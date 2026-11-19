@@ -9,7 +9,7 @@ binding = "ASSETS"
 [[d1_databases]]
 binding = "DB"
 database_name = "accounts-erp-forex"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "38cf235f-1e85-445b-8e34-20996f18543d"
 migrations_dir = "worker/migrations"
 
 [[r2_buckets]]
