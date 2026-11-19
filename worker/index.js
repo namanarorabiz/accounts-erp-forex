@@ -6,7 +6,7 @@ const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 async function derive(p,s){const k=await crypto.subtle.importKey("raw",enc.encode(p),"PBKDF2",false,["deriveBits"]);return b64(await crypto.subtle.deriveBits({name:"PBKDF2",salt:s,iterations:310000,hash:"SHA-256"},k,256));}
 async function hmac(v,secret){const k=await crypto.subtle.importKey("raw",enc.encode(secret),{name:"HMAC",hash:"SHA-256"},["sign"]);return b64(await crypto.subtle.sign("HMAC",k,enc.encode(v)));}
 function getCookie(req,n){const m=(req.headers.get("Cookie")||"").match(new RegExp("(?:^|; )"+n+"=([^;]+)"));return m?decodeURIComponent(m[1]):null;}
-function originOK(req,env){const o=req.headers.get("Origin");return !!o && o===env.APP_ORIGIN;}
+function originOK(req,env){const o=req.headers.get("Origin");return o?o===env.APP_ORIGIN:["GET","HEAD"].includes(req.method);}
 async function readBody(req){try{return await req.json()}catch{return {}}}
 async function audit(env,a,target,action,record=null,details=""){await env.DB.prepare("INSERT INTO audit_log(id,actor_id,target_owner_id,action,record_id,details) VALUES(?,?,?,?,?,?)").bind(uid(),a.id,target,action,record,details).run();}
 async function auth(req,env){
