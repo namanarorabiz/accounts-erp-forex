@@ -130,10 +130,31 @@ async function makeSnapshot(env){
  audit_log:(await env.DB.prepare("SELECT * FROM audit_log").all()).results};
  return {format:"accounts-erp-forex-backup-v1",created_at:new Date().toISOString(),tables};
 }
-export default fetch:async(req,env)=>{const u=new URL(req.url);if(!u.pathname.startsWith("/api/"))return env.ASSETS.fetch(req);return handle(req,env)}=>{
- const now=new Date(),snap=JSON.stringify(await makeSnapshot(env)),stamp=now.toISOString().replace(/[:.]/g,"-"),month=now.toISOString().slice(0,7);
- await env.BACKUPS.put(`daily/${stamp}.json`,snap);
- if(now.getUTCDate()===1)await env.BACKUPS.put(`monthly/${month}.json`,snap);
- const cutoff=Date.now()-90*86400000;let cursor;
- do{const page=await env.BACKUPS.list({prefix:"daily/",cursor});for(const obj of page.objects)if(new Date(obj.uploaded).getTime()<cutoff)await env.BACKUPS.delete(obj.key);cursor=page.truncated?page.cursor:undefined;}while(cursor);
-}};
+export default {
+  fetch: async (req, env) => handle(req, env),
+  scheduled: async (event, env) => {
+    const now = new Date();
+    const snap = JSON.stringify(await makeSnapshot(env));
+    const stamp = now.toISOString().replace(/[:.]/g, "-");
+    const month = now.toISOString().slice(0, 7);
+
+    await env.BACKUPS.put(`daily/${stamp}.json`, snap);
+
+    if (now.getUTCDate() === 1) {
+      await env.BACKUPS.put(`monthly/${month}.json`, snap);
+    }
+
+    const cutoff = Date.now() - 90 * 86400000;
+    let cursor;
+
+    do {
+      const page = await env.BACKUPS.list({ prefix: "daily/", cursor });
+      for (const obj of page.objects) {
+        if (new Date(obj.uploaded).getTime() < cutoff) {
+          await env.BACKUPS.delete(obj.key);
+        }
+      }
+      cursor = page.truncated ? page.cursor : undefined;
+    } while (cursor);
+  }
+};
