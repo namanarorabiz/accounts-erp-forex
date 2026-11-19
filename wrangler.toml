@@ -1,3 +1,4 @@
+
 name = "accounts-erp-forex"
 main = "worker/index.js"
 compatibility_date = "2026-11-19"
@@ -11,10 +12,3 @@ binding = "DB"
 database_name = "accounts-erp-forex"
 database_id = "38cf235f-1e85-445b-8e34-20996f18543d"
 migrations_dir = "worker/migrations"
-
-[[r2_buckets]]
-binding = "BACKUPS"
-bucket_name = "accounts-erp-forex-backups"
-
-[triggers]
-crons = ["20 15 * * *"]
