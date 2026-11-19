@@ -1,0 +1,20 @@
+name = "accounts-erp-forex"
+main = "worker/index.js"
+compatibility_date = "2026-11-19"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "accounts-erp-forex"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+migrations_dir = "worker/migrations"
+
+[[r2_buckets]]
+binding = "BACKUPS"
+bucket_name = "accounts-erp-forex-backups"
+
+[triggers]
+crons = ["20 15 * * *"]
