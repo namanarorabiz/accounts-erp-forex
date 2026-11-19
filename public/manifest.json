@@ -1,0 +1,11 @@
+{
+  "name": "Accounts ERP Forex",
+  "short_name": "Forex ERP",
+  "description": "Private forex accounting workspace",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b1220",
+  "theme_color": "#101827",
+  "orientation": "portrait",
+  "icons": []
+}
