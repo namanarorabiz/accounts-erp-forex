@@ -130,7 +130,7 @@ async function makeSnapshot(env){
  audit_log:(await env.DB.prepare("SELECT * FROM audit_log").all()).results};
  return {format:"accounts-erp-forex-backup-v1",created_at:new Date().toISOString(),tables};
 }
-export default {fetch:(req,env)=>handle(req,env),scheduled:async(e,env)=>{
+export default fetch:async(req,env)=>{const u=new URL(req.url);if(!u.pathname.startsWith("/api/"))return env.ASSETS.fetch(req);return handle(req,env)}=>{
  const now=new Date(),snap=JSON.stringify(await makeSnapshot(env)),stamp=now.toISOString().replace(/[:.]/g,"-"),month=now.toISOString().slice(0,7);
  await env.BACKUPS.put(`daily/${stamp}.json`,snap);
  if(now.getUTCDate()===1)await env.BACKUPS.put(`monthly/${month}.json`,snap);
