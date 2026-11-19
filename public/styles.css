@@ -1,0 +1,38 @@
+:root{color-scheme:dark;font-family:system-ui,-apple-system,sans-serif;background:#0b1220;color:#edf2f7}
+*{box-sizing:border-box}
+body{margin:0}
+.wrap{max-width:1100px;margin:auto;padding:18px 14px 60px}
+header{display:flex;justify-content:space-between;align-items:center;margin:10px 0 22px}
+small,.muted{color:#9aa9bd}
+h1{font-size:25px;margin:4px 0}
+h2{margin-top:0}
+.pill{background:#1e3a5f;padding:7px 12px;border-radius:30px}
+.panel{background:#121d2e;border:1px solid #28364b;border-radius:16px;padding:17px;margin:13px 0}
+label{display:block;margin:11px 0;color:#c6d2e2;font-size:14px}
+input,select{display:block;width:100%;padding:12px;margin-top:6px;border:1px solid #40516a;border-radius:9px;background:#0c1524;color:white;font-size:16px;min-width:0}
+button{background:#2875d0;color:white;border:0;border-radius:9px;padding:11px 14px;font-size:14px;margin:6px 5px 6px 0}
+button.secondary{background:#34445b}
+button:disabled{opacity:.4}
+nav{display:flex;flex-wrap:wrap;gap:3px}
+nav button{font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:10px}
+.stat{background:#0b1525;padding:14px;border-radius:12px;min-width:0}
+.stat strong{display:block;font-size:20px;margin-top:5px;overflow-wrap:anywhere}
+.gridform{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0 12px}
+.gridform .wide{grid-column:1/-1}
+.sectionhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.filters{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.filters input{width:auto}
+.tablewrap{overflow-x:auto;margin-top:14px}
+table{border-collapse:collapse;width:100%;min-width:680px;font-size:13px}
+th,td{text-align:left;padding:10px;border-bottom:1px solid #304056;white-space:nowrap}
+th{color:#aebed1}
+.rowitem{padding:11px 0;border-bottom:1px solid #304056;overflow-wrap:anywhere}
+.ownerOnly{}
+@media(max-width:600px){
+.wrap{padding:12px 10px 45px}
+.panel{padding:13px}
+.sectionhead{align-items:flex-start}
+.filters input{width:125px}
+nav button{padding:9px;font-size:12px}
+}
