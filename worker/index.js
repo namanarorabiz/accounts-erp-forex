@@ -18,7 +18,7 @@ async function auth(req,env){
 }
 async function bootstrap(env){
  const n=await env.DB.prepare("SELECT COUNT(*) n FROM users").first();if(n.n)return;
- if(!env.INITIAL_OWNER_PASSWORD||env.INITIAL_OWNER_PASSWORD.length<14)throw Error("Set INITIAL_OWNER_PASSWORD (at least 14 characters) in Worker secrets first.");
+ if(!env.INITIAL_OWNER_PASSWORD||env.INITIAL_OWNER_PASSWORD.length<5)throw Error("Set INITIAL_OWNER_PASSWORD (at least 5 characters) in Worker secrets first.");
  const salt=crypto.getRandomValues(new Uint8Array(16)),hash=await derive(env.INITIAL_OWNER_PASSWORD,salt);
  await env.DB.prepare("INSERT INTO users(id,username,role,password_salt,password_hash) VALUES(?,?,?,?,?)").bind(uid(),"owner","owner",b64(salt),hash).run();
 }
