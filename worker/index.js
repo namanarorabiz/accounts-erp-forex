@@ -84,7 +84,7 @@ async function handle(req,env){
   if(req.method==="GET"){const c=await env.DB.prepare("SELECT id,username,active FROM users WHERE role='client'").first();return json(c||{});}
   if(req.method==="POST"){
    const b=await readBody(req),name=String(b.username||"admin@123").trim(),pw=String(b.temporaryPassword||"");
-   if(!/^[A-Za-z0-9._@-]{3,40}$/.test(name)||pw.length<14)return json({error:"Provide a valid username and a temporary password of at least 14 characters."},400);
+   if(!/^[A-Za-z0-9._@-]{3,40}$/.test(name)||pw.length<5)return json({error:"Provide a valid username and a temporary password of at least 14 characters."},400);
    const old=await env.DB.prepare("SELECT id FROM users WHERE role='client'").first(),salt=crypto.getRandomValues(new Uint8Array(16)),hash=await derive(pw,salt);
    try{
     if(old){await env.DB.prepare("UPDATE users SET username=?,password_salt=?,password_hash=?,must_change_password=1,active=1 WHERE id=?").bind(name,b64(salt),hash,old.id).run();await env.DB.prepare("DELETE FROM sessions WHERE user_id=?").bind(old.id).run();}
