@@ -3,7 +3,7 @@ const json=(d,s=200,h={})=>new Response(JSON.stringify(d),{status:s,headers:{"Co
 const uid=()=>crypto.randomUUID(), enc=new TextEncoder();
 const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b)));
 const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
-async function derive(p,s){const k=await crypto.subtle.importKey("raw",enc.encode(p),"PBKDF2",false,["deriveBits"]);return b64(await crypto.subtle.deriveBits({name:"PBKDF2",salt:s,iterations:310000,hash:"SHA-256"},k,256));}
+async function derive(p,s){const k=await crypto.subtle.importKey("raw",enc.encode(p),"PBKDF2",false,["deriveBits"]);return b64(await crypto.subtle.deriveBits({name:"PBKDF2",salt:s,iterations:100000,hash:"SHA-256"},k,256));}
 async function hmac(v,secret){const k=await crypto.subtle.importKey("raw",enc.encode(secret),{name:"HMAC",hash:"SHA-256"},["sign"]);return b64(await crypto.subtle.sign("HMAC",k,enc.encode(v)));}
 function getCookie(req,n){const m=(req.headers.get("Cookie")||"").match(new RegExp("(?:^|; )"+n+"=([^;]+)"));return m?decodeURIComponent(m[1]):null;}
 function originOK(req,env){const o=req.headers.get("Origin");return o?o===env.APP_ORIGIN:["GET","HEAD"].includes(req.method);}
