@@ -60,7 +60,7 @@ async function clearLogin(env,key){await env.DB.prepare("DELETE FROM login_attem
 async function getTarget(env,a,view){if(a.role==="owner"&&view==="client"){const c=await env.DB.prepare("SELECT id FROM users WHERE role='client' AND active=1").first();return c?.id||null;}return a.id;}
 async function handle(req,env){
  const u=new URL(req.url),p=u.pathname;
- if(p.startsWith("/api/")&&!originOK(req,env))return json({error:"Request origin not allowed."},403);
+ if(p.startsWith("/api/") && p!=="/api/setup" && !originOK(req,env)) return json({error:"Request origin not allowed."},403);
  if(p==="/api/setup"&&req.method==="POST"){try{await bootstrap(env);return json({ok:true,message:"Owner account initialized."})}catch(e){return json({error:e.message},500)}}
  if(p==="/api/login"&&req.method==="POST"){
   const b=await readBody(req),username=String(b.username||"").trim(),key=(username.toLowerCase()+"|"+(req.headers.get("CF-Connecting-IP")||"unknown")).slice(0,180);
