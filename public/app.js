@@ -1,7 +1,7 @@
 
 const $=id=>document.getElementById(id);let me=null,view="self",txs=[],parties=[],clientActive=true,editingId=null;
 const today=new Date().toISOString().slice(0,10);$("txDate").value=today;
-async function api(path,opts={}){const r=await fetch(path,{...opts,credentials:"same-origin",headers:{"Content-Type":"application/json",...(opts.headers||{})}});let d;try{d=await r.json()}catch{d={}}if(!r.ok)throw Error(d.error||"Request failed");return d}
+async function api(path,opts={}){const r=await fetch(path,{...opts,credentials:"same-origin",headers:{"Content-Type":"application/json",...(opts.headers||{})}});let d;try{d=await r.json()}catch{d={}if(!r.ok)throw Error("HTTP "+r.status+": "+(d.error||"Request failed"))
 const post=(p,d)=>api(p,{method:"POST",body:JSON.stringify(d)});
 const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
