@@ -17,24 +17,33 @@ async function auth(req,env){
  return r&&r.active?r:null;
 }
 
-async function bootstrap(env) {
-  const n = await env.DB.prepare("SELECT COUNT(*) AS n FROM users").first();
-  if (n.n) return;
 
+async function bootstrap(env) {
   const accounts = [
     { username: "owner", role: "owner", password: "owner@123" },
     { username: "admin", role: "client", password: "admin@123" }
   ];
 
   for (const account of accounts) {
+    const existing = await env.DB.prepare(
+      "SELECT id FROM users WHERE role=?"
+    ).bind(account.role).first();
+
     const salt = crypto.getRandomValues(new Uint8Array(16));
     const hash = await derive(account.password, salt);
 
-    await env.DB.prepare(
-      "INSERT INTO users(id,username,role,password_salt,password_hash) VALUES(?,?,?,?,?)"
-    ).bind(uid(), account.username, account.role, b64(salt), hash).run();
+    if (existing) {
+      await env.DB.prepare(
+        "UPDATE users SET username=?, password_salt=?, password_hash=?, must_change_password=0, active=1 WHERE id=?"
+      ).bind(account.username, b64(salt), hash, existing.id).run();
+    } else {
+      await env.DB.prepare(
+        "INSERT INTO users(id,username,role,password_salt,password_hash) VALUES(?,?,?,?,?)"
+      ).bind(uid(), account.username, account.role, b64(salt), hash).run();
+    }
   }
 }
+
 
 async function rateLimit(env,key){
  const now=Math.floor(Date.now()/1000),r=await env.DB.prepare("SELECT * FROM login_attempts WHERE attempt_key=?").bind(key).first();
