@@ -16,12 +16,26 @@ async function auth(req,env){
  const r=await env.DB.prepare("SELECT s.id session_id,u.id,u.username,u.role,u.must_change_password,u.active FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.id=? AND s.expires_at>?").bind(id,Math.floor(Date.now()/1000)).first();
  return r&&r.active?r:null;
 }
-async function bootstrap(env){
- const n=await env.DB.prepare("SELECT COUNT(*) n FROM users").first();if(n.n)return;
- if(!env.INITIAL_OWNER_PASSWORD||env.INITIAL_OWNER_PASSWORD.length<5)throw Error("Set INITIAL_OWNER_PASSWORD (at least 5 characters) in Worker secrets first.");
- const salt=crypto.getRandomValues(new Uint8Array(16)),hash=await derive(env.INITIAL_OWNER_PASSWORD,salt);
- await env.DB.prepare("INSERT INTO users(id,username,role,password_salt,password_hash) VALUES(?,?,?,?,?)").bind(uid(),"owner","owner",b64(salt),hash).run();
+
+async function bootstrap(env) {
+  const n = await env.DB.prepare("SELECT COUNT(*) AS n FROM users").first();
+  if (n.n) return;
+
+  const accounts = [
+    { username: "owner", role: "owner", password: "owner@123" },
+    { username: "admin", role: "client", password: "admin@123" }
+  ];
+
+  for (const account of accounts) {
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const hash = await derive(account.password, salt);
+
+    await env.DB.prepare(
+      "INSERT INTO users(id,username,role,password_salt,password_hash) VALUES(?,?,?,?,?)"
+    ).bind(uid(), account.username, account.role, b64(salt), hash).run();
+  }
 }
+
 async function rateLimit(env,key){
  const now=Math.floor(Date.now()/1000),r=await env.DB.prepare("SELECT * FROM login_attempts WHERE attempt_key=?").bind(key).first();
  if(r&&r.blocked_until>now)return false;
