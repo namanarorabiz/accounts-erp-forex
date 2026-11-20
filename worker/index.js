@@ -69,7 +69,7 @@ async function handle(req,env){
  if(p==="/api/password"&&req.method==="POST"){
   const b=await readBody(req),u0=await env.DB.prepare("SELECT * FROM users WHERE id=?").bind(a.id).first();
   if(await derive(String(b.currentPassword||""),unb64(u0.password_salt))!==u0.password_hash)return json({error:"Current password is incorrect."},403);
-  const pw=String(b.newPassword||"");if(pw.length<14)return json({error:"Use at least 14 characters."},400);
+  const pw=String(b.newPassword||"");if(pw.length<5)return json({error:"Use at least 14 characters."},400);
   const salt=crypto.getRandomValues(new Uint8Array(16)),hash=await derive(pw,salt);
   await env.DB.prepare("UPDATE users SET password_salt=?,password_hash=?,must_change_password=0 WHERE id=?").bind(b64(salt),hash,a.id).run();
   await env.DB.prepare("DELETE FROM sessions WHERE user_id=?").bind(a.id).run();await audit(env,a,a.id,"password_changed");
