@@ -153,30 +153,16 @@ async function makeSnapshot(env){
  return {format:"accounts-erp-forex-backup-v1",created_at:new Date().toISOString(),tables};
 }
 export default {
-  fetch: async (req, env) => handle(req, env),
-  scheduled: async (event, env) => {
-    const now = new Date();
-    const snap = JSON.stringify(await makeSnapshot(env));
-    const stamp = now.toISOString().replace(/[:.]/g, "-");
-    const month = now.toISOString().slice(0, 7);
+  async fetch(req, env) {
+    const url = new URL(req.url);
 
-    await env.BACKUPS.put(`daily/${stamp}.json`, snap);
-
-    if (now.getUTCDate() === 1) {
-      await env.BACKUPS.put(`monthly/${month}.json`, snap);
+    if (url.pathname === "/demo" || url.pathname === "/demo.html") {
+      return env.ASSETS.fetch(
+        new Request(new URL("/demo.html", req.url), req)
+      );
     }
 
-    const cutoff = Date.now() - 90 * 86400000;
-    let cursor;
-
-    do {
-      const page = await env.BACKUPS.list({ prefix: "daily/", cursor });
-      for (const obj of page.objects) {
-        if (new Date(obj.uploaded).getTime() < cutoff) {
-          await env.BACKUPS.delete(obj.key);
-        }
-      }
-      cursor = page.truncated ? page.cursor : undefined;
-    } while (cursor);
+    return handle(req, env);
   }
 };
+
