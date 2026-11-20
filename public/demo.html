@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accounts ERP Forex - Demo</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0b1220;color:#edf2fa;font-family:Arial,sans-serif}
+header{padding:22px;background:#111c2d;border-bottom:1px solid #26364d}
+header h1{margin:0;font-size:24px}
+header p{color:#9eacc0;margin:8px 0 0}
+main{max-width:1100px;margin:auto;padding:18px}
+nav{display:flex;gap:9px;overflow:auto;margin-bottom:20px}
+nav button,.btn{border:0;border-radius:9px;padding:12px 16px;background:#24364e;color:white;cursor:pointer;white-space:nowrap}
+nav button.active,.primary{background:#2878d0}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.card{background:#142135;border:1px solid #293b53;border-radius:14px;padding:17px;margin-bottom:14px}
+.card small{color:#aab8cb}
+.value{font-size:23px;font-weight:bold;margin-top:10px}
+h2{font-size:19px;margin-top:0}
+input,select{background:#0c1728;border:1px solid #3b4d65;color:white;border-radius:9px;padding:12px;width:100%;margin:6px 0 13px}
+label{font-size:13px;color:#bdc9d9}
+.formgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+table{width:100%;border-collapse:collapse;min-width:650px}
+th,td{text-align:left;padding:13px 10px;border-bottom:1px solid #293b53;font-size:13px}
+th{color:#aab8cb}
+.tablewrap{overflow:auto}
+.green{color:#42d69a}.red{color:#ff8585}
+section{display:none}section.active{display:block}
+.muted{color:#9eacc0;font-size:13px}
+@media(max-width:650px){.grid{grid-template-columns:repeat(2,1fr)}.formgrid{grid-template-columns:1fr}main{padding:12px}.value{font-size:19px}}
+</style>
+</head>
+<body>
+<header>
+ <h1>Accounts ERP Forex</h1>
+ <p>Private Finance Workspace · DEMO MODE</p>
+</header>
+<main>
+<nav>
+ <button class="active" onclick="show('dashboard',this)">Dashboard</button>
+ <button onclick="show('transactions',this)">Transactions</button>
+ <button onclick="show('parties',this)">Parties</button>
+ <button onclick="show('reports',this)">Reports</button>
+</nav>
+
+<section id="dashboard" class="active">
+ <h2>Financial Overview</h2>
+ <div class="grid">
+  <div class="card"><small>Total Buy (INR)</small><div class="value" id="buy">₹0</div></div>
+  <div class="card"><small>Total Sell (INR)</small><div class="value" id="sell">₹0</div></div>
+  <div class="card"><small>Income (INR)</small><div class="value green" id="income">₹0</div></div>
+  <div class="card"><small>Expenses (INR)</small><div class="value red" id="expense">₹0</div></div>
+ </div>
+ <div class="card">
+  <h2>Recent Transactions</h2>
+  <div class="tablewrap"><table><thead><tr><th>Date</th><th>Party</th><th>Type</th><th>Currency</th><th>INR</th></tr></thead><tbody id="recent"></tbody></table></div>
+ </div>
+ <p class="muted">Sample data only. Changes stay in this demo page.</p>
+</section>
+
+<section id="transactions">
+ <div class="card">
+  <h2>Add Transaction</h2>
+  <form id="txform">
+   <div class="formgrid">
+    <div><label>Date</label><input id="date" type="date" required></div>
+    <div><label>Party Name</label><input id="party" list="partylist" placeholder="Enter party name" required><datalist id="partylist"></datalist></div>
+    <div><label>Transaction Type</label><select id="type"><option>Buy</option><option>Sell</option><option>Income</option><option>Expense</option></select></div>
+    <div><label>Currency</label><select id="currency"><option>USD</option><option>EUR</option><option>GBP</option><option>AED</option><option>CAD</option><option>SGD</option><option>INR</option></select></div>
+    <div><label>Foreign Amount</label><input id="foreign" type="number" step="0.01" placeholder="Amount" required></div>
+    <div><label>Rate (INR)</label><input id="rate" type="number" step="0.0001" placeholder="Exchange rate" required></div>
+   </div>
+   <label>Reference / Notes</label><input id="notes" placeholder="Optional details">
+   <button class="btn primary" type="submit">Save Transaction</button>
+  </form>
+ </div>
+ <div class="card">
+  <h2>All Transactions</h2>
+  <div class="tablewrap"><table><thead><tr><th>Date</th><th>Party</th><th>Type</th><th>Currency</th><th>Foreign Amount</th><th>Rate</th><th>INR Amount</th></tr></thead><tbody id="alltx"></tbody></table></div>
+ </div>
+</section>
+
+<section id="parties">
+ <div class="card">
+  <h2>Party Directory</h2>
+  <label>Add New Party</label>
+  <input id="newparty" placeholder="Party / customer name">
+  <button class="btn primary" onclick="addParty()">Add Party</button>
+  <div id="partyrows" style="margin-top:15px"></div>
+ </div>
+</section>
+
+<section id="reports">
+ <div class="card">
+  <h2>Transaction Summary</h2>
+  <div id="summary"></div>
+  <button class="btn primary" onclick="exportCSV()">Export Excel-compatible CSV</button>
+ </div>
+</section>
+</main>
+<script>
+let parties=["ABC Forex","Global Traders","Rahul Enterprises"];
+let tx=[
+ {date:"2026-11-19",party:"ABC Forex",type:"Buy",currency:"USD",foreign:1000,rate:88.5,notes:"Sample"},
+ {date:"2026-11-19",party:"Global Traders",type:"Sell",currency:"EUR",foreign:500,rate:103,notes:"Sample"},
+ {date:"2026-11-20",party:"Rahul Enterprises",type:"Income",currency:"INR",foreign:5000,rate:1,notes:"Commission"}
+];
+const $=id=>document.getElementById(id);
+const money=n=>"₹"+Number(n).toLocaleString("en-IN",{maximumFractionDigits:2});
+function show(id,btn){document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));$(id).classList.add("active");document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));btn.classList.add("active");render()}
+function render(){
+ let total=k=>tx.filter(t=>t.type===k).reduce((s,t)=>s+t.foreign*t.rate,0);
+ $("buy").textContent=money(total("Buy"));$("sell").textContent=money(total("Sell"));$("income").textContent=money(total("Income"));$("expense").textContent=money(total("Expense"));
+ let rows=tx.slice().reverse();
+ $("recent").innerHTML=rows.slice(0,5).map(t=>`<tr><td>${t.date}</td><td>${esc(t.party)}</td><td>${t.type}</td><td>${t.currency}</td><td>${money(t.foreign*t.rate)}</td></tr>`).join("");
+ $("alltx").innerHTML=rows.map(t=>`<tr><td>${t.date}</td><td>${esc(t.party)}</td><td>${t.type}</td><td>${t.currency}</td><td>${t.foreign}</td><td>${t.rate}</td><td>${money(t.foreign*t.rate)}</td></tr>`).join("");
+ $("partyrows").innerHTML=parties.map(p=>`<div class="card">${esc(p)}</div>`).join("");
+ $("partylist").innerHTML=parties.map(p=>`<option value="${esc(p)}">`).join("");
+ $("summary").innerHTML=["Buy","Sell","Income","Expense"].map(k=>`<p>${k}: <b>${money(total(k))}</b></p>`).join("");
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function addParty(){let p=$("newparty").value.trim();if(p&&!parties.some(x=>x.toLowerCase()===p.toLowerCase()))parties.push(p);$("newparty").value="";render()}
+$("txform").addEventListener("submit",e=>{
+ e.preventDefault();
+ let t={date:$("date").value,party:$("party").value.trim(),type:$("type").value,currency:$("currency").value,foreign:Number($("foreign").value),rate:Number($("rate").value),notes:$("notes").value};
+ if(!t.foreign||!t.rate||t.foreign<0||t.rate<0)return alert("Enter valid amounts and rate.");
+ if(!parties.some(p=>p.toLowerCase()===t.party.toLowerCase()))parties.push(t.party);
+ tx.push(t);e.target.reset();$("date").value=new Date().toISOString().slice(0,10);render();alert("Demo transaction saved.");
+});
+function exportCSV(){
+ let lines=[["Date","Party","Type","Currency","Foreign Amount","Rate","INR Amount"],...tx.map(t=>[t.date,t.party,t.type,t.currency,t.foreign,t.rate,t.foreign*t.rate])];
+ let blob=new Blob([lines.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n")],{type:"text/csv"});
+ let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="forex-demo.csv";a.click();URL.revokeObjectURL(a.href);
+}
+$("date").value=new Date().toISOString().slice(0,10);render();
+</script>
+</body>
+</html>
