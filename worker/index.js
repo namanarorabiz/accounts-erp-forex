@@ -19,28 +19,27 @@ async function auth(req,env){
 
 
 async function bootstrap(env) {
-  const accounts = [
-    { username: "owner", role: "owner", password: "owner@123" },
-    { username: "admin", role: "client", password: "admin@123" }
-  ];
+  const account = {
+    username: "admin@123",
+    role: "client",
+    password: "owner@123"
+  };
 
-  for (const account of accounts) {
-    const existing = await env.DB.prepare(
-      "SELECT id FROM users WHERE role=?"
-    ).bind(account.role).first();
+  const existing = await env.DB.prepare(
+    "SELECT id FROM users WHERE role='client'"
+  ).first();
 
-    const salt = crypto.getRandomValues(new Uint8Array(16));
-    const hash = await derive(account.password, salt);
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const hash = await derive(account.password, salt);
 
-    if (existing) {
-      await env.DB.prepare(
-        "UPDATE users SET username=?, password_salt=?, password_hash=?, must_change_password=0, active=1 WHERE id=?"
-      ).bind(account.username, b64(salt), hash, existing.id).run();
-    } else {
-      await env.DB.prepare(
-        "INSERT INTO users(id,username,role,password_salt,password_hash) VALUES(?,?,?,?,?)"
-      ).bind(uid(), account.username, account.role, b64(salt), hash).run();
-    }
+  if (existing) {
+    await env.DB.prepare(
+      "UPDATE users SET username=?, password_salt=?, password_hash=?, must_change_password=0, active=1 WHERE id=?"
+    ).bind(account.username, b64(salt), hash, existing.id).run();
+  } else {
+    await env.DB.prepare(
+      "INSERT INTO users(id,username,role,password_salt,password_hash) VALUES(?,?,?,?,?)"
+    ).bind(uid(), account.username, account.role, b64(salt), hash).run();
   }
 }
 
